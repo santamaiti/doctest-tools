@@ -3,17 +3,12 @@
 # testdoc.py [-r] file
 
 import warnings
-
-warnings.simplefilter('ignore')
-
-import site
 import os.path
 import sys
 import doctest
 from doctest_tools import setpath
 
-warnings.resetwarnings()
-warnings.simplefilter('error')
+warnings.simplefilter('default')
 
 def import_module(modulepath):
     pythonpath = setpath.setpath(modulepath)
@@ -38,10 +33,10 @@ def test(path):
     return doctest.testmod(module)
 
 def usage():
-    sys.stderr.write("usage: testdoc.py [-r] file\n")
+    sys.stderr.write("usage: %s [-r] file\n" % os.path.basename(sys.argv[0]))
     sys.exit(2)
 
-if __name__ == "__main__":
+def run_command():
     if len(sys.argv) < 2: usage()
     if sys.argv[1] == '-r':
         if len(sys.argv) != 3: usage()
@@ -54,3 +49,6 @@ if __name__ == "__main__":
     errors, tests = test(filename)
     if print_numbers: sys.stdout.write("%d %d\n" % (errors, tests))
     if errors: sys.exit(1)
+
+if __name__ == "__main__":
+    run_command()

@@ -1,13 +1,27 @@
 # setup.py
 
+import sys
 from distutils.core import setup
+from distutils import file_util
+
+def scripts():
+    scripts = ['scripts/testdoc', 'scripts/testall']
+    suffix = "%d.%d" % sys.version_info[:2]
+    if sys.executable.lower().endswith('python'):
+        ans = scripts[:]
+    else:
+        ans = []
+    for oldname in scripts:
+        newname = "%s-%s" % (oldname, suffix)
+        file_util.copy_file(oldname, newname)
+        ans.append(newname)
+    return ans
 
 setup(
     name = "doctest-tools",
     version = "1.0a1",
     packages = ['doctest_tools'],
-    scripts = ['doctest_tools/testdoc.py', 'doctest_tools/testall.py'],
-    #data_files = [('pyke', ['copyright_license', 'hgrc_keywords', 'README'])],
+    scripts = scripts(),
 
     #zip_safe = True,
 
@@ -38,6 +52,7 @@ setup(
         The egg files installed by easy_install are:
           - FIX ME 2.5
           - FIX ME 2.6
+          - FIX ME 3.1
     """,
     download_url =
         "FIX ME",

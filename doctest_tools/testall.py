@@ -26,7 +26,7 @@ def execute(args, print_last_line = True):
 
 def call_testdoc(path):
     if sys.version_info[0] == 2 and sys.version_info[1] >= 6:
-        last_line = execute((sys.executable, '-3', '-S',
+        last_line = execute((sys.executable, '-3',
                                '-m', 'doctest_tools.testdoc', '-r', path),
                             False)
     else:
@@ -78,9 +78,12 @@ def usage():
     sys.stderr.write("usage: testall.py [py | tst | txt]...\n")
     sys.exit(2)
 
-if __name__ == "__main__":
+def run_command():
     if len(sys.argv) > 1 and sys.argv[1] in ('-h', '--help'): usage()
     files, tests, errors = run(*sys.argv[1:])
     sys.stdout.write("Files: %d, Tests: %d, Errors: %d\n" %
                        (files, tests, errors))
     if errors: sys.exit(1)
+
+if __name__ == "__main__":
+    run_command()
