@@ -1,0 +1,34 @@
+This is the README file for the doctest-tools package.
+
+To install this package, download and unpack the source package and then:
+
+sudo python setup.py install
+
+If you have multiple versions of python installed, you can run install once
+for each version:
+
+sudo python2.5 setup.py install
+sudo python setup.py install    # for example, if 'python' is the 2.6 version
+sudo python3.1 setup.py install
+
+These will install two programs: testdoc and testall onto your system for each
+version of python.  The python version number is appended to each name:
+testdoc-2.5, testdoc-2.6, testdoc-3.1 and the same for testall.  In addition,
+the version installed with just 'python' (with no version suffix) will have
+testdoc and testall without version suffixes (in addition to copies with the
+version suffix for your default 'python' program).
+
+The testdoc program runs the doctests on one file.  If the file passed ends in
+.py, pyc or .pyo, it runs doctest.testmod, otherwise it runs doctest.testfile.
+In ether case it determines the proper local directory to add to the "Python
+path" so that the tests will find the proper versions of needed modules.
+
+The testall program recursively looks for files with .py, .tst or .txt
+suffixes (or the list of suffixes you provide to it) and runs testdoc on each
+file in a separate process (so that tests do not cross contaminate each
+other).  A final summary of the number of files, tests and errors is printed
+along with a list of all of the files that had errors.
+
+These programs are covered under the "MIT License" (see the License file
+included in the source directory).
+

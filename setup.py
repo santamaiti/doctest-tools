@@ -1,11 +1,26 @@
 # setup.py
 
 import sys
+import os, os.path
+#import glob
 from distutils.core import setup
 from distutils import file_util
 
+def rm_r(dir):
+    for root, dirs, files in os.walk(dir, topdown=False):
+       for name in files:
+           os.remove(os.path.join(root, name))
+       for name in dirs:
+           os.rmdir(os.path.join(root, name))
+    if os.path.isdir(dir): os.rmdir(dir)
+
+rm_r('build')
+#for f in glob.glob('scripts/testdoc-*'): os.remove(f)
+#for f in glob.glob('scripts/testall-*'): os.remove(f)
+
 def scripts():
     scripts = ['scripts/testdoc', 'scripts/testall']
+    if 'install' not in sys.argv[-1]: return scripts
     suffix = "%d.%d" % sys.version_info[:2]
     if sys.executable.lower().endswith('python'):
         ans = scripts[:]
@@ -15,6 +30,7 @@ def scripts():
         newname = "%s-%s" % (oldname, suffix)
         file_util.copy_file(oldname, newname)
         ans.append(newname)
+    #sys.stderr.write("scripts: %r\n" % ans)
     return ans
 
 setup(

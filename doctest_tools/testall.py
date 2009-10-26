@@ -15,7 +15,8 @@ def execute(args, print_last_line = True):
 
     The last line is not printed if print_last_line is False.
 
-    Returns the last_line (or None if no output), process return code
+    Returns a two tuple: the last_line (or None if no output), and the process
+    return code.
     """
     child = subprocess.Popen(args,
                              stdin=None,
@@ -34,6 +35,20 @@ def execute(args, print_last_line = True):
     return (lines[-1] if lines else None), child.returncode
 
 def call_testdoc(path, py3kwarning = True):
+    r"""Calls testdoc in a subprocess.
+
+    The version of python used to run testdoc is the same as the version of
+    python running this function.
+
+    The stdout and stderr from testdoc are written to stdout.
+
+    The number of errors and tests is returned as a 2-tuple.
+
+    The py3kwarning flag will turn on the '-3' option for python if python 2.6+
+    is being called.  This outputs warnings about constructs that are not
+    easily translated to Python 3 with the Python's 2to3 tool.  The option is
+    ignored if running Python 2.5 or before, or Python 3.
+    """
     if py3kwarning and sys.version_info[0] == 2 and sys.version_info[1] >= 6:
         last_line, status = execute((sys.executable, '-3',
                                        '-m', 'doctest_tools.testdoc',
@@ -57,10 +72,46 @@ def call_testdoc(path, py3kwarning = True):
     return 1, 0
 
 def filename_key(filename):
+    r"""somepath.suffix => (suffix, somepath)
+    
+    This is only used as the 'key' function to sort.
+    """
     base, ext = os.path.splitext(filename)
     return ext, base
 
 def run(suffixes, py3kwarning = False):
+    r"""Recursively look for files and run testdoc on them.
+
+    This starts in the current working directory and recursively looks for all
+    files ending in one of the 'suffixes' provided (default 'py', 'tst', and
+    'txt').  It runs testdoc on each of the files found in a separate process
+    (so that tests don't cross contaminate each other).
+
+    It automatically ignores the following directories: .hg, .svn, build and
+    dest.  This list is currently hard-coded...
+
+    It also automatically ignores any file starting with 'setup' and ending
+    with '.py'.  This is also currently hard-coded...
+
+    Finally, if there is a file called 'testall.exclude' in any subdirectory,
+    the file is read to get a list of names (one per line, with lines starting
+    with '#' ignored).  These names can be either directory names or file
+    names.  Globbing is not allowed.  All of the names listed will be ignored
+    within this directory.  BUT, note that these names will _not_ be ignored
+    within subdirectories!
+
+    The order that the tests are run is:
+    
+      - all matching files sorted first by file extension, then by file name.
+      - all subdirectories, in sorted order.
+
+    This function returns a 4-tuple:
+    
+      - the number of files tested
+      - the number of tests run within those files
+      - the number of tests that had errors
+      - a list of the paths names for the files that had errors.
+    """
     #sys.stdout.write("run %r\n" % suffixes)
     if not suffixes: suffixes = 'py', 'tst', 'txt'
     suffixes = tuple((s if s[0] == '.' else '.' + s) for s in suffixes)
@@ -118,6 +169,13 @@ def run(suffixes, py3kwarning = False):
 
 
 def run_command():
+    r"""Process command line args and call run().
+
+    This also prints (to stdout) a summary of the number of files, tests and
+    errors encountered, along with a list of the files that had errors.
+
+    Returns an exit status of 1 if any errors are reported.
+    """
     parser = optparse.OptionParser(
                usage="usage: %s [-h|--help] [-3] [suffix...]" %
                        os.path.basename(sys.argv[0]))
