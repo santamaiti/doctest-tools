@@ -2,12 +2,10 @@
 
 # testdoc.py [-r] file
 
-from __future__ import with_statement
-
-import warnings
-import os, os.path
 import sys
+import os, os.path
 import doctest
+import warnings
 from doctest_tools import setpath
 
 warnings.simplefilter('default')
@@ -34,9 +32,10 @@ def test(path, remove_first_path = False):
     This will run testmod if the file ends in .py, .pyc or .pyo; and testfile
     for all other files.
 
-    When running testfile, it enables Python's "with" statement (as if the
-    file being tested had done "from __future__ import with_statement").  This
-    is done because doing the __future__ import does not work in files. :-(
+    When running testfile on python 2.5, it enables Python's "with" statement
+    (as if the file being tested had done "from __future__ import
+    with_statement").  This is done because doing the __future__ import does
+    not work in files. :-(
 
     Also when running testfile, the current working directory is first set to
     the directory containing the file.  This is not done for python modules
@@ -53,16 +52,21 @@ def test(path, remove_first_path = False):
     fullpath = os.path.abspath(path)
     if path.endswith('.py'):
         module = import_module(fullpath[:-3], remove_first_path)
-    elif path.endswith('.pyc') or path.endswith('.pyo'):
+    elif path.endswith(('.pyc', '.pyo')):
         module = import_module(fullpath[:-4], remove_first_path)
     else:
         setpath.setpath(fullpath[:-(len(path) + 1)],
                         remove_first=remove_first_path)
         os.chdir(os.path.dirname(fullpath))
-        return doctest.testfile(fullpath, False,
-                                globs={
-                                  'with_statement': with_statement,
-                                })
+        if sys.version_info[:2] == (2, 5):
+            import __future__
+            return doctest.testfile(fullpath, False,
+                                    globs={
+                                      'with_statement':
+                                        __future__.with_statement,
+                                    })
+        else:
+            return doctest.testfile(fullpath, False)
     module.doing_doctest = True
     return doctest.testmod(module)
 
@@ -88,7 +92,8 @@ def run_command(remove_first_path = False):
         print_numbers = False
         filename = sys.argv[1]
     errors, tests = test(filename, remove_first_path)
-    if print_numbers: sys.stdout.write("%d %d\n" % (errors, tests))
+    if print_numbers:
+        sys.stdout.write("TESTDOC RESULTS: %d %d\n" % (errors, tests))
     if errors: sys.exit(1)
 
 if __name__ == "__main__":
