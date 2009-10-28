@@ -64,14 +64,9 @@ setup(
 
         These tools are written in Python so that they will run on all
         platforms.
-
-        The egg files installed by easy_install are:
-          - FIX ME 2.5
-          - FIX ME 2.6
-          - FIX ME 3.1
     """,
     download_url =
-        "FIX ME",
+        "http://doctest-tools.googlecode.com/files/doctest-tools-1.0a1.zip",
     classifiers = [
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
