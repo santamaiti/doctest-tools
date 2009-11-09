@@ -1,1 +1,1 @@
-include LICENSE MANIFEST.in
+include LICENSE MANIFEST.in RELEASE_NOTES.txt
