@@ -4,16 +4,18 @@
   - version (line 38)
   - download_url (line 69)
 
-- hg commit
-- hg tag 1.0a1
-- rm -rf build dist MANIFEST
-- python setup.py sdist --formats zip
+$ hg commit
+$ hg tag 1.0a1
+$ sudo rm -rf build dist MANIFEST
+$ python setup.py sdist --formats zip
+
 - go to http://code.google.com/p/doctest-tools/downloads/list and upload the
   zip file.
-- hg push
-- hg push google
-- python setup.py register
-- sudo python2.4 setup.py install
-- sudo python2.5 setup.py install
-- sudo python setup.py install
-- sudo python3.1 setup.py install
+
+$ hg push
+$ hg push google
+$ python setup.py register
+$ sudo python2.4 setup.py install
+$ sudo python2.5 setup.py install
+$ sudo python setup.py install
+$ sudo python3.1 setup.py install
