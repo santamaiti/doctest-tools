@@ -35,7 +35,7 @@ def scripts():
 
 setup(
     name = "doctest-tools",
-    version = "1.0a1",
+    version = "1.0a2",
     packages = ['doctest_tools'],
     scripts = scripts(),
 
@@ -66,7 +66,7 @@ setup(
         platforms.
     """,
     download_url =
-        "http://doctest-tools.googlecode.com/files/doctest-tools-1.0a1.zip",
+        "http://doctest-tools.googlecode.com/files/doctest-tools-1.0a2.zip",
     classifiers = [
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

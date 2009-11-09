@@ -45,7 +45,7 @@ def execute(args, line_filter = None):
             ans.append(filtered)
     return ans, child.returncode
 
-testdoc_results_re = re.compile(r'TESTDOC RESULTS: ([0-9]+) ([0-9]+)$')
+testdoc_results_re = re.compile(r'TESTDOC RESULTS: ([0-9]+) ([0-9]+)\r?$')
 
 def call_testdoc(path, py3kwarning = True):
     r"""Calls testdoc in a subprocess.
