@@ -14,7 +14,18 @@ def is_package(path):
             return True
     return False
 
-def setpath(filepath = None, remove_cwd = True, remove_first = False):
+def find_root(filepath):
+    r"""Find the first directory (root) that is not a package directory.
+
+    filepath may be either the path to a file or directory.  If it is the path
+    to a file, the directory containing that file is used.
+    """
+    filepath = os.path.abspath(filepath)
+    if not os.path.isdir(filepath): filepath = os.path.split(filepath)[0]
+    while is_package(filepath): filepath = os.path.split(filepath)[0]
+    return filepath
+
+def setpath(filepath, remove_cwd = True, remove_first = False):
     r"""Add the appropriate prefix of filepath to sys.path.
 
     This searches backwards up the list of directories in filepath looking for
@@ -34,15 +45,13 @@ def setpath(filepath = None, remove_cwd = True, remove_first = False):
 
     If remove_cwd is True, it will remove an '' entry (if any) from sys.path.
     """
-    filepath = os.path.abspath(filepath)
-    if not os.path.isdir(filepath): filepath = os.path.split(filepath)[0]
-    while is_package(filepath): filepath = os.path.split(filepath)[0]
+    rootpath = find_root(filepath)
     if remove_first:
         # kill path to this program...
         #sys.stderr.write("removing %r from sys.path\n" % sys.path[0])
         del sys.path[0]
     if remove_cwd and '' in sys.path: sys.path.remove('')
-    if filepath in sys.path: sys.path.remove(filepath)
-    sys.path.insert(0, filepath)
-    return filepath
+    if rootpath in sys.path: sys.path.remove(rootpath)
+    sys.path.insert(0, rootpath)
+    return rootpath
 
