@@ -2,4 +2,5 @@
 
 from doctest_tools import testall
 
-testall.run_command()
+if __name__ == "__main__":
+    testall.run_command()

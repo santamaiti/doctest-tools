@@ -1,5 +1,0 @@
-#!/usr/bin/python
-
-from doctest_tools import testdoc
-
-testdoc.run_command(True)

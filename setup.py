@@ -15,19 +15,20 @@ def rm_r(dir):
     if os.path.isdir(dir): os.rmdir(dir)
 
 rm_r('build')
-#for f in glob.glob('scripts/testdoc-*'): os.remove(f)
-#for f in glob.glob('scripts/testall-*'): os.remove(f)
+#for f in glob.glob('scripts/testdoc_*'): os.remove(f)
+#for f in glob.glob('scripts/testall_*'): os.remove(f)
 
 def scripts():
-    scripts = ['scripts/testdoc', 'scripts/testall']
+    scripts = ['scripts/testdoc.py', 'scripts/testall.py']
     if 'install' not in sys.argv[-1]: return scripts
-    suffix = "%d.%d" % sys.version_info[:2]
-    if sys.executable.lower().endswith('python'):
+    suffix = "%d%d" % sys.version_info[:2]
+    if sys.executable.lower().endswith('python') or \
+       sys.executable.lower().endswith('python.exe'):
         ans = scripts[:]
     else:
         ans = []
     for oldname in scripts:
-        newname = "%s-%s" % (oldname, suffix)
+        newname = "%s_%s.py" % (oldname[:-3], suffix)
         file_util.copy_file(oldname, newname)
         ans.append(newname)
     #sys.stderr.write("scripts: %r\n" % ans)

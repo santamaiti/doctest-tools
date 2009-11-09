@@ -2,8 +2,8 @@ syntax: glob
 
 *.pyc
 *.pyo
-testdoc-*
-testall-*
+testdoc_*.py
+testall_*.py
 .pyhist
 .*.swp
 *.egg-info
