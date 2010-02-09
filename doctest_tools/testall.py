@@ -105,7 +105,7 @@ def read_args(dirpath, dict):
     try:
         for line in f:
             line = line.strip()
-            if line[0] == '#': continue
+            if not line or line[0] == '#': continue
             args = line.split()
             dict.setdefault(args[0], []).extend(args[1:])
     finally:
@@ -248,7 +248,7 @@ def run_command():
     Returns an exit status of 1 if any errors are reported.
     """
     parser = optparse.OptionParser(
-               usage="usage: %s [-h|--help] [-3] [suffix...]" %
+               usage="usage: %s [options] [suffix...]" %
                        os.path.basename(sys.argv[0]))
     parser.add_option('-3', action='store_true', dest='py3kwarning',
                             default=False,
