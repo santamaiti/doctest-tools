@@ -70,6 +70,6 @@ def setpath(filepath, remove_cwd = True, remove_first = False, full = False):
         if rootpath in sys.path: sys.path.remove(rootpath)
         paths.append(rootpath)
         filepath = find_root(rootpath, True)
-    sys.path.extend(paths)
+    sys.path[0:0] = paths
     return paths
 

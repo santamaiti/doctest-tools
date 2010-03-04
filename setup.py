@@ -36,7 +36,7 @@ def scripts():
 
 setup(
     name = "doctest-tools",
-    version = "1.0a2",
+    version = "1.0a3",
     packages = ['doctest_tools'],
     scripts = scripts(),
 
