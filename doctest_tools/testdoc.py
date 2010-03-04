@@ -10,23 +10,26 @@ from doctest_tools import setpath
 
 warnings.simplefilter('default')
 
-def import_module(modulepath, remove_first_path = False):
+def import_module(modulepath, remove_first_path = False, full = True):
     r"""Imports the module indicated by modulepath.
 
-    Also adds the proper containing directory to Python's sys.path.
+    Also adds the proper containing directories to Python's sys.path.
 
     Returns the imported module.
     """
-    pythonpath = setpath.setpath(modulepath, remove_first=remove_first_path)
+    pythonpath = \
+      setpath.setpath(modulepath, remove_first=remove_first_path, full=full)
     #sys.stdout.write("setpath: %s\n" % pythonpath)
-    modulepath = modulepath[len(pythonpath) + 1:]
+    modulepath = modulepath[len(pythonpath[0]) + 1:]
+    #sys.stdout.write("modulepath: %s\n" % modulepath)
     modulename = modulepath.replace('/', '.').replace(os.path.sep, '.')
+    #sys.stdout.write("modulename: %s\n" % modulename)
     module = __import__(modulename)
     for comp in modulename.split('.')[1:]:
         module = getattr(module, comp)
     return module
 
-def test(path, remove_first_path = False):
+def test(path, remove_first_path = False, full = True):
     r"""Runs doctest on the file indicated by 'path'.
 
     This will run testmod if the file ends in .py, .pyc or .pyo; and testfile
@@ -41,22 +44,20 @@ def test(path, remove_first_path = False):
     the directory containing the file.  This is not done for python modules
     (.py, .pyc or .pyo files).
 
-    In all cases, the lowest level directory not containing an
-    __init__.{py,pyc,pyo} file is added to sys.path.  For Python modules, the
-    search is started in the directory in containing the module.  For other
-    files, the search starts in the current working directory (since
-    subdirectories may only contain text files and not contain a __init__.py
-    files).
+    In all cases, all non-package directories containing package directories
+    (i.e., directories containing an __init__.{py,pyc,pyo} file) are added to
+    sys.path.  The search is started in the directory containing the file.  If
+    the bottom-most directory is not a package directory, it is added to the
+    path too.
     """
     path = os.path.normpath(path)
     fullpath = os.path.abspath(path)
     if path.endswith('.py'):
-        module = import_module(fullpath[:-3], remove_first_path)
+        module = import_module(fullpath[:-3], remove_first_path, full)
     elif path.endswith(('.pyc', '.pyo')):
-        module = import_module(fullpath[:-4], remove_first_path)
+        module = import_module(fullpath[:-4], remove_first_path, full)
     else:
-        setpath.setpath(fullpath[:-(len(path) + 1)],
-                        remove_first=remove_first_path)
+        setpath.setpath(fullpath, remove_first=remove_first_path, full=full)
         os.chdir(os.path.dirname(fullpath))
         if sys.version_info[:2] == (2, 5):
             import __future__
