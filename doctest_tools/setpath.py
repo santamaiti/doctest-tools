@@ -2,36 +2,77 @@
 
 import os.path
 import sys
+import glob
 
 def is_package(path):
     r"""Tests whether path is a Python package directory.
 
-    The way it determines this is by checking for an __init__.{py,pyc,pyo}
-    file in the directory.
+    The way it determines this is by checking for an __init__.py* file
+    in the directory.
     """
-    for suffix in 'py', 'pyc', 'pyo':
-        if os.path.exists(os.path.join(path, '__init__.' + suffix)):
-            return True
-    return False
+    try:
+        glob.iglob(os.path.join(path, '__init__.py*')).next()
+        return True
+    except StopIteration:
+        return False
 
-def find_root(filepath, look_for_package = False):
-    r"""Find the first directory (root) that is (not) a package directory.
+def has_package(path):
+    r"""Tests whether path contains any Python package directories.
 
-    filepath may be either the path to a file or directory.  If it is the path
+    The way it determines this is by checking for */__init__.py* files.
+    """
+    try:
+        glob.iglob(os.path.join(path, '*', '__init__.py*')).next()
+        return True
+    except StopIteration:
+        return False
+
+def find_root(dirpath, find_package = False):
+    r"""Find the first directory that is (not) a package directory.
+
+    dirpath may be either the path to a file or directory.  If it is the path
     to a file, the search starts at the directory containing that file.
 
     Returns None if no directory is found.
     """
-    filepath = os.path.abspath(filepath)
-    if not os.path.isdir(filepath):
-        filepath = os.path.dirname(filepath)
+    dirpath = os.path.abspath(dirpath)
+    if not os.path.isdir(dirpath):
+        dirpath = os.path.dirname(dirpath)
     lastpath = None
-    while filepath != lastpath and is_package(filepath) != look_for_package:
-        lastpath = filepath
-        filepath = os.path.dirname(filepath)
-    if filepath == lastpath:
+    while dirpath != lastpath and is_package(dirpath) != find_package:
+        lastpath = dirpath
+        dirpath = os.path.dirname(dirpath)
+    if dirpath == lastpath:
         return None
-    return filepath
+    return dirpath
+
+def find_roots(dirpath):
+    r"""Generates the root directories to add to sys.path.
+
+    The root directories are generated bottom to top.
+
+    dirpath may be either the path to a file or directory.  If it is the path
+    to a file, the search starts at the directory containing that file.
+    """
+    dirpath = os.path.abspath(dirpath)
+    if not os.path.isdir(dirpath):
+        dirpath = os.path.dirname(dirpath)
+    lastpath = None
+    while True:
+        # Find first directory without an __init__.py* file.
+        while dirpath != lastpath and is_package(dirpath):
+            lastpath = dirpath
+            dirpath = os.path.dirname(dirpath)
+        if dirpath == lastpath:
+            break
+        yield dirpath       # first directory without an __init__.py* file.
+        lastpath = dirpath
+        dirpath = os.path.dirname(dirpath)
+        while dirpath != lastpath and not is_package(dirpath):
+            if has_package(dirpath):
+                yield dirpath
+            lastpath = dirpath
+            dirpath = os.path.dirname(dirpath)
 
 def setpath(filepath, remove_cwd = True, remove_first = False, full = False):
     r"""Add the appropriate prefix of filepath to sys.path.
@@ -63,13 +104,10 @@ def setpath(filepath, remove_cwd = True, remove_first = False, full = False):
         del sys.path[0]
     if remove_cwd and '' in sys.path: sys.path.remove('')
     paths = []
-    while filepath is not None:
-        rootpath = find_root(filepath)
-        if rootpath is None:
-            break
-        if rootpath in sys.path: sys.path.remove(rootpath)
-        paths.append(rootpath)
-        filepath = find_root(rootpath, True)
+    for dirpath in find_roots(filepath):
+        if dirpath in sys.path: sys.path.remove(dirpath)
+        paths.append(dirpath)
+        if not full: break
     sys.path[0:0] = paths
     return paths
 

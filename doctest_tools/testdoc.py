@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
-# testdoc.py [-r] file
+# testdoc.py [-d] [-r] file
 
 import sys
 import os, os.path
 import doctest
 import warnings
 from doctest_tools import setpath
+
+debug = False
 
 warnings.simplefilter('default')
 
@@ -19,11 +21,14 @@ def import_module(modulepath, remove_first_path = False, full = True):
     """
     pythonpath = \
       setpath.setpath(modulepath, remove_first=remove_first_path, full=full)
-    #sys.stdout.write("setpath: %s\n" % pythonpath)
+    if debug:
+        sys.stderr.write("setpath added: %s\n" % (pythonpath,))
     modulepath = modulepath[len(pythonpath[0]) + 1:]
-    #sys.stdout.write("modulepath: %s\n" % modulepath)
+    if debug:
+        sys.stderr.write("modulepath: %s\n" % (modulepath,))
     modulename = modulepath.replace('/', '.').replace(os.path.sep, '.')
-    #sys.stdout.write("modulename: %s\n" % modulename)
+    if debug:
+        sys.stderr.write("modulename: %s\n" % (modulename,))
     module = __import__(modulename)
     for comp in modulename.split('.')[1:]:
         module = getattr(module, comp)
@@ -57,7 +62,10 @@ def test(path, remove_first_path = False, full = True):
     elif path.endswith(('.pyc', '.pyo')):
         module = import_module(fullpath[:-4], remove_first_path, full)
     else:
-        setpath.setpath(fullpath, remove_first=remove_first_path, full=full)
+        new_paths = \
+          setpath.setpath(fullpath, remove_first=remove_first_path, full=full)
+        if debug:
+            sys.stderr.write("setpath added: %s\n" % (new_paths,))
         os.chdir(os.path.dirname(fullpath))
         if sys.version_info[:2] == (2, 5):
             import __future__
@@ -72,7 +80,8 @@ def test(path, remove_first_path = False, full = True):
     return doctest.testmod(module)
 
 def usage():
-    sys.stderr.write("usage: %s [-r] file\n" % os.path.basename(sys.argv[0]))
+    sys.stderr.write("usage: %s [-d] [-r] file\n" %
+                       os.path.basename(sys.argv[0]))
     sys.exit(2)
 
 def run_command(remove_first_path = False):
@@ -83,15 +92,20 @@ def run_command(remove_first_path = False):
 
     Returns an exit status of 1 if any errors are reported.
     """
-    if len(sys.argv) < 2: usage()
-    if sys.argv[1] == '-r':
-        if len(sys.argv) != 3: usage()
+    global debug
+    print_numbers = False
+    command_args = sys.argv[1:]
+    if not command_args: usage()
+    if command_args[0] == '-d':
+        if len(command_args) < 2: usage()
+        debug = True
+        del command_args[0]
+    if command_args[0] == '-r':
+        if len(command_args) < 2: usage()
         print_numbers = True
-        filename = sys.argv[2]
-    else:
-        if len(sys.argv) != 2: usage()
-        print_numbers = False
-        filename = sys.argv[1]
+        del command_args[0]
+    if len(command_args) != 1: usage()
+    filename = command_args[0]
     errors, tests = test(filename, remove_first_path)
     if print_numbers:
         sys.stdout.write("TESTDOC RESULTS: %d %d\n" % (errors, tests))
