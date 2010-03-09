@@ -10,22 +10,18 @@ def is_package(path):
     The way it determines this is by checking for an __init__.py* file
     in the directory.
     """
-    try:
-        glob.iglob(os.path.join(path, '__init__.py*')).next()
+    for _ in glob.iglob(os.path.join(path, '__init__.py*')):
         return True
-    except StopIteration:
-        return False
+    return False
 
 def has_package(path):
     r"""Tests whether path contains any Python package directories.
 
     The way it determines this is by checking for */__init__.py* files.
     """
-    try:
-        glob.iglob(os.path.join(path, '*', '__init__.py*')).next()
+    for _ in glob.iglob(os.path.join(path, '*', '__init__.py*')):
         return True
-    except StopIteration:
-        return False
+    return False
 
 def find_root(dirpath, find_package = False):
     r"""Find the first directory that is (not) a package directory.
@@ -49,30 +45,42 @@ def find_root(dirpath, find_package = False):
 def find_roots(dirpath):
     r"""Generates the root directories to add to sys.path.
 
-    The root directories are generated bottom to top.
+    The root directories are generated bottom to top and include the
+    bottom-most directory if it's not a package, then all higher directories
+    that are not packages themselves, but contain packages.
 
     dirpath may be either the path to a file or directory.  If it is the path
     to a file, the search starts at the directory containing that file.
     """
-    dirpath = os.path.abspath(dirpath)
+    dirpath = os.path.normpath(os.path.abspath(dirpath))
     if not os.path.isdir(dirpath):
         dirpath = os.path.dirname(dirpath)
     lastpath = None
-    while True:
+    while dirpath != lastpath:
         # Find first directory without an __init__.py* file.
         while dirpath != lastpath and is_package(dirpath):
             lastpath = dirpath
             dirpath = os.path.dirname(dirpath)
+        # dirpath == lastpath or not is_package(dirpath)
         if dirpath == lastpath:
             break
-        yield dirpath       # first directory without an __init__.py* file.
+        # not is_package(dirpath)
+
+        # If the first directory was not a package directory, we want it
+        # included!
+        # Otherwise, we know that this has packages, because we just left one!
+        yield dirpath
+
         lastpath = dirpath
         dirpath = os.path.dirname(dirpath)
         while dirpath != lastpath and not is_package(dirpath):
             if has_package(dirpath):
+                # This covers the case where a directory includes packages
+                # other than the sub-directory we just came from.
                 yield dirpath
             lastpath = dirpath
             dirpath = os.path.dirname(dirpath)
+        # dirpath == lastpath or is_package(dirpath)
 
 def setpath(filepath, remove_cwd = True, remove_first = False, full = False):
     r"""Add the appropriate prefix of filepath to sys.path.
