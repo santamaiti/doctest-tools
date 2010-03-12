@@ -1,8 +1,8 @@
 - update version in doctest_tools/__init__.py
 - update the following lines in setup.py
 
-  - version (line 38)
-  - download_url (line 69)
+  - version (line 39)
+  - download_url (line 70)
 
 $ hg commit
 $ hg tag 1.0a1

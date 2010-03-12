@@ -67,7 +67,7 @@ setup(
         platforms.
     """,
     download_url =
-        "http://doctest-tools.googlecode.com/files/doctest-tools-1.0a2.zip",
+        "http://doctest-tools.googlecode.com/files/doctest-tools-1.0a3.zip",
     classifiers = [
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

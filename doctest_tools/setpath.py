@@ -23,25 +23,6 @@ def has_package(path):
         return True
     return False
 
-def find_root(dirpath, find_package = False):
-    r"""Find the first directory that is (not) a package directory.
-
-    dirpath may be either the path to a file or directory.  If it is the path
-    to a file, the search starts at the directory containing that file.
-
-    Returns None if no directory is found.
-    """
-    dirpath = os.path.abspath(dirpath)
-    if not os.path.isdir(dirpath):
-        dirpath = os.path.dirname(dirpath)
-    lastpath = None
-    while dirpath != lastpath and is_package(dirpath) != find_package:
-        lastpath = dirpath
-        dirpath = os.path.dirname(dirpath)
-    if dirpath == lastpath:
-        return None
-    return dirpath
-
 def find_roots(dirpath):
     r"""Generates the root directories to add to sys.path.
 
