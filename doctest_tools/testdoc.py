@@ -80,8 +80,11 @@ def test(path, remove_first_path = False, full = True):
     return doctest.testmod(module)
 
 def usage():
-    sys.stderr.write("usage: %s [-d] [-r] file\n" %
-                       os.path.basename(sys.argv[0]))
+    sys.stderr.write("usage: %s [-d] [-r] file\n"
+                       "       if -d is specified, debug output is turned on\n"
+                       "       if -r is specified, the number of errors "
+                       "and tests is printed to stderr\n"
+                     % os.path.basename(sys.argv[0]))
     sys.exit(2)
 
 def run_command(remove_first_path = False):
@@ -95,20 +98,34 @@ def run_command(remove_first_path = False):
     global debug
     print_numbers = False
     command_args = sys.argv[1:]
-    if not command_args: usage()
+    if not command_args:
+        usage()
+    if command_args[0] in ('-h', '--help'):
+        usage()
     if command_args[0] == '-d':
-        if len(command_args) < 2: usage()
+        if len(command_args) < 2:
+            usage()
         debug = True
         del command_args[0]
     if command_args[0] == '-r':
-        if len(command_args) < 2: usage()
+        if len(command_args) < 2:
+            usage()
         print_numbers = True
         del command_args[0]
-    if len(command_args) != 1: usage()
+    if len(command_args) != 1:
+        usage()
     filename = command_args[0]
-    errors, tests = test(filename, remove_first_path)
+    try:
+        errors, tests = test(filename, remove_first_path)
+    except IOError:
+        sys.stdout.write("%s: file not found\n\n" % filename)
+        usage()
+    except ImportError:
+        sys.stdout.write("%s: module not found\n\n" % filename)
+        usage()
     if print_numbers:
-        sys.stdout.write("TESTDOC RESULTS: %d %d\n" % (errors, tests))
+        sys.stdout.write("TESTDOC RESULTS: Errors %d, Tests %d\n" %
+                           (errors, tests))
     if errors: sys.exit(1)
 
 if __name__ == "__main__":

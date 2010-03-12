@@ -4,13 +4,19 @@
   - version (line 39)
   - download_url (line 70)
 
+- check issues at http://code.google.com/p/doctest-tools/issues/list
+
+- update RELEASE_NOTES.txt
+
 $ hg commit
 $ hg tag 1.0a1
 $ sudo rm -rf build dist MANIFEST
 $ python setup.py sdist --formats zip
 
 - go to http://code.google.com/p/doctest-tools/downloads/list and upload the
-  zip file.
+  zip and the RELEASE_NOTES.txt file.
+
+- update wiki: http://code.google.com/p/doctest-tools/w/list
 
 $ hg push
 $ hg push google

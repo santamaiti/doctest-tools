@@ -1,3 +1,18 @@
+Release 1.0a3, Mar 12, 2010
+===========================
+
+Changed how setpath works.  It now adds multiple directories to the path, and
+returns a list.  Each directory going back up the path that is not a package
+directory, but contains package directories is added to the path now.  If the
+bottom-most directory is not a package directory, it is added to the path too.
+
+Also:
+
+    - Changed setpath.find_root to setpath.find_roots.
+    - Applied patch from issue #2.
+    - Allow blank lines in testall.config files.
+
+
 Release 1.0a2, Nov 9, 2009
 ==========================
 
